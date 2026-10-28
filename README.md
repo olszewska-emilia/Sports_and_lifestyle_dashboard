@@ -16,6 +16,12 @@ The frontend is built with **Streamlit**, while reusable Python modules handle a
 
 ## Application Overview
 
+### Application Preview
+
+![Training Insights application demo](docs/media/demo.gif)
+
+### Dashboard Sections
+
 The application is divided into five sections accessible through the sidebar:
 
 - **Overview:** An introduction to the project, its authors, technologies, and observations about activity preferences in the original dataset.
