@@ -18,7 +18,7 @@ The frontend is built with **Streamlit**, while reusable Python modules handle a
 
 ### Application Preview
 
-![Training Insights application demo](docs/media/demo.gif)
+![Training Insights application demo](assets/animations/intro.gif)
 
 ### Dashboard Sections
 
