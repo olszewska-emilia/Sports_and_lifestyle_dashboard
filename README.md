@@ -1,102 +1,139 @@
 # Training Insights
 
-An interactive Python dashboard for exploring physical activity, understanding weather patterns, and finding similar running routes. Built as a university data analysis project (PDU) by **Aleksandra Mulewicz, Emilia Olszewska, and Nina Onyszczuk**.
+![Python](https://img.shields.io/badge/Python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)
 
-![Training Insights demo](docs/media/demo.gif)
+An interactive data visualization dashboard designed to explore physical activity, understand how weather relates to training habits, and discover similar running routes. The application brings together activity records, GPS tracks, and historical Melbourne weather through a Streamlit interface, complete with tea animations and playful insights into the dataset.
 
-[Original intro animation](docs/media/intro.gif) · [Project presentation](docs/presentation.pdf)
+## About this repository
 
-## Features
+Built as a university data analysis project (PDU) by **Aleksandra Mulewicz, Emilia Olszewska, and Nina Onyszczuk**, Training Insights explores patterns in running, cycling, and walking activities. It combines data preparation, interactive charts, geographic analysis, and two historical route recommendation methods in one application.
 
-- Activity summaries by weekday, month, sport, and temperature.
-- Heart-rate outlier filtering and six relative intensity zones.
-- Geographic visualizations of training start points, route centroids, and recorded tracks.
-- Running route recommendations based on distance, duration, calories, and intensity, or on distance and weather conditions.
-- Exploratory comparisons of wind, rainfall, performance, and energy expenditure.
+The frontend is built with **Streamlit**, while reusable Python modules handle activity processing, heart-rate classification, weather matching, and route ranking. Some chart labels and exploratory comments are in Polish.
 
-The interface retains the original project's tea animations and playful dataset facts. Some chart labels and exploratory comments are in Polish.
+## Application Overview
 
-## Quick start
+The application is divided into five sections accessible through the sidebar:
 
-Use Python 3.11 or newer. Run the commands from the repository root:
+- **Overview:** An introduction to the project, its authors, technologies, and observations about activity preferences in the original dataset.
+- **Data Visualisation:** Interactive charts showing activity patterns by weekday, month, and temperature, alongside intensity comparisons and a heart-rate zone treemap.
+- **Nobody Expects The Spanish Inquisition:** A playful look at training data, turning performance and energy expenditure into unexpected comparisons.
+- **Plotly Map Visualisation:** Geographic views of training start points and route centroids, with distance and maximum speed adding context to the maps.
+- **Recommendation System:** Two ways to explore recorded running routes: by distance, duration, calories, and intensity, or by distance and weather conditions such as temperature, rain, wind, and cloud cover.
+
+### Technical Highlights
+
+- **Data Pipeline:** Loads activity summaries from JSON and route samples from CSV, prepares timestamps, and combines training records with an hourly weather snapshot.
+- **Heart-Rate Analysis:** Filters outliers using a three-standard-deviation threshold and groups measurements into six relative intensity zones based on the maximum observed heart rate.
+- **Geographic Visualization:** Uses Plotly for interactive maps of activity locations and recorded tracks. OpenStreetMap tiles are available by default, with optional Mapbox styling.
+- **Route Recommendations:** Standardizes selected features and ranks historical running activities by Pearson correlation with the requested feature vector, returning up to five matches.
+- **Weather Exploration:** Matches activity timestamps to hourly observations and supports exploratory analysis of weather, performance, and energy expenditure. Weather downloads are handled by a separate script using Open-Meteo.
+
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| **Frontend** | Streamlit, streamlit-option-menu, streamlit-lottie |
+| **Data Processing** | Pandas, NumPy |
+| **Visualizations** | Plotly, Matplotlib, Seaborn |
+| **Weather Data** | Open-Meteo, openmeteo-requests, requests-cache, retry-requests |
+| **Maps** | Plotly, OpenStreetMap, optional Mapbox |
+| **Testing** | Python unittest |
+
+---
+
+## Setup & Installation
+
+Use **Python 3.11 or newer**. Run the following commands from the repository root.
+
+### 1. Create a virtual environment and install dependencies
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m streamlit run app.py
 ```
 
-Open the local URL printed by Streamlit. Without training exports, the app displays setup instructions. **Personal training data is not included**, so the complete dashboard requires the data described below. The GIF and presentation provide a preview without installing anything.
+On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1`.
 
-## Data and configuration
+### 2. Add your training data
 
-Place your extracted exports in:
+Personal training exports are not included. Create and populate these directories:
 
 ```text
-data/raw/json/   # One activity summary object per .json file
-data/raw/csv/    # Route samples in .csv files, concatenated by the loader
+data/raw/json/    # One activity summary object per JSON file
+data/raw/csv/     # CSV files containing recorded route samples
 ```
 
-These directories are ignored by Git except for their placeholder files. This project expects the original course export schema; it is not a general-purpose Garmin/FIT/GPX importer. Keep the field names, including units, intact.
+The dashboard expects the original course export schema, including field names and units. It does not directly import FIT or GPX files.
 
-| Input | Fields used by the dashboard |
+| Input | Expected fields |
 | --- | --- |
-| Activity JSON | `timestamp`, `start_time`, `sport`, `avg_heart_rate@bpm`, `avg_temperature@C`, `total_distance@km`, `total_elapsed_time@s`, `total_timer_time@s`, `total_calories@kcal`, `enhanced_max_speed@km/h` |
-| Activity coordinates | `start_position_lat@deg`, `start_position_long@deg`, `nec_lat@deg`, `nec_long@deg`, `swc_lat@deg`, `swc_long@deg` |
-| Route CSV | `timestamp`, `position_lat@deg`, `position_long@deg`, `heart_rate@bpm`, `distance@km`, `speed@km/h`, `cadence@rpm`, `step_length@mm` |
+| **Activity summaries** | `timestamp`, `start_time`, `sport`, `avg_heart_rate@bpm`, `avg_temperature@C`, `avg_speed@km/h`, `total_distance@km`, `total_elapsed_time@s`, `total_timer_time@s`, `total_calories@kcal`, `enhanced_max_speed@km/h` |
+| **Activity coordinates** | `start_position_lat@deg`, `start_position_long@deg`, `nec_lat@deg`, `nec_long@deg`, `swc_lat@deg`, `swc_long@deg` |
+| **Route samples** | `timestamp`, `position_lat@deg`, `position_long@deg`, `heart_rate@bpm`, `distance@km`, `speed@km/h`, `cadence@rpm`, `step_length@mm` |
 
-Timestamps are normalized to UTC for weather and route matching. Activity calendar charts use Melbourne local time. The exploratory scripts use additional columns from the original export, such as cadence, strides, and ascent.
+Exploratory scripts may require additional fields from the original exports. Keep personal training exports and credentials out of version control.
 
-The bundled `data/weather/hourly_data.csv` contains hourly Melbourne weather for **29 August 2019–21 March 2024**. Activities outside this range will not have matching weather observations. The download script records the original archive request and variables.
+### 3. Configure optional settings
 
-Configuration uses environment variables:
+Configuration uses environment variables; no API credentials are required for the default map tiles or bundled weather data.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `MAPBOX_TOKEN` | Empty | Optional token for Mapbox styling; otherwise OpenStreetMap tiles |
-| `PDU_JSON_DATA_DIR` | `data/raw/json` | Activity export directory |
-| `PDU_CSV_DATA_DIR` | `data/raw/csv` | Route export directory |
-| `PDU_WEATHER_DATA_PATH` | `data/weather/hourly_data.csv` | Hourly weather snapshot |
+| `MAPBOX_TOKEN` | Empty | Enables the original Mapbox styling |
+| `PDU_JSON_DATA_DIR` | `data/raw/json` | Activity summary directory |
+| `PDU_CSV_DATA_DIR` | `data/raw/csv` | Route sample directory |
+| `PDU_WEATHER_DATA_PATH` | `data/weather/hourly_data.csv` | Weather snapshot location |
 
-Relative paths resolve from the repository root. You can use absolute paths for exports stored elsewhere.
+Relative paths resolve from the repository root. Absolute paths can point to exports stored elsewhere. Set variables in your terminal before launching the app; `.env` files are not loaded automatically.
 
-For macOS/Linux, copy `.env.example` to `.env`, fill in your values, and load it before starting the app:
+### 4. Run the application
 
 ```bash
-cp .env.example .env
-# Edit .env, then:
-set -a
-source .env
-set +a
 python -m streamlit run app.py
 ```
 
-The application does not automatically read `.env`. In PowerShell, set variables directly, for example `$env:MAPBOX_TOKEN = "your-token"`.
+Open the local URL printed by Streamlit. If training exports are missing, the app displays setup instructions.
 
-## Repository layout
+## Data & Recommendation Notes
+
+The bundled weather snapshot covers **Melbourne from 29 August 2019 to 21 March 2024**. Activities outside this period will not have matching observations. Activity and route matching uses UTC timestamps, while activity calendar charts use Melbourne local time.
+
+Recommendations retrieve similar historical activities and their recorded routes. They do not generate new routes or use live weather forecasts. Heart-rate zones describe the supplied dataset and are not personalized physiological thresholds.
+
+The dashboard was designed for a sufficiently populated dataset containing running, cycling, and walking. Some charts and the five-route selector require enough complete records; sparse or differently structured exports may need adaptation.
+
+## Project Structure
 
 ```text
-app.py                          Streamlit entry point
+app.py                      Streamlit entry point
 training_insights/
-  config.py                     Environment variables and portable paths
-  data.py                       JSON and CSV readers
-  weather.py                    Local weather snapshot reader
-  heart_zones.py                Heart-rate filtering and classification
-  visualization.py              Shared Plotly maps and charts
-  analysis/                     Activity, heart-rate, and weather analyses
-  recommendations/              Activity-based and weather-based route ranking
-scripts/                        Original explorations and explicit weather download
-assets/animations/              Tea animation used in the dashboard
-data/raw/                       Local-only activity and route exports
-data/weather/                   Bundled hourly weather snapshot
-docs/                           Presentation and original demo animations
-tests/                          Automated regression checks
-.github/workflows/              GitHub Actions checks
+  config.py                 Environment variables and paths
+  data.py                   Activity and route loaders
+  weather.py                Weather snapshot reader
+  heart_zones.py            Heart-rate filtering and classification
+  visualization.py          Shared maps and charts
+  analysis/                 Activity, heart-rate, and weather analyses
+  recommendations/          Activity-based and weather-based route ranking
+scripts/                    Exploratory analyses and weather download
+assets/animations/          Tea animation
+data/weather/               Bundled hourly Melbourne weather
+tests/                      Automated regression checks
 ```
 
-Reusable modules do not fetch weather, open plot windows, or load private training exports on import. Exploratory scripts intentionally execute analyses and display plots when run:
+## Development
+
+Run the regression checks with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Run the original exploratory analyses with:
 
 ```bash
 python -m scripts.explore_routes
@@ -104,33 +141,13 @@ python -m scripts.explore_weather
 python -m scripts.explore_energy
 ```
 
-To refresh the weather snapshot (requires internet access and replaces the configured weather CSV):
+To download weather data again, run the command below. It requires internet access and replaces the configured weather CSV.
 
 ```bash
 python -m scripts.download_weather
 ```
 
-## How recommendations work
+## Authors
 
-The app filters running activities, standardizes the selected features, and ranks historical activities by Pearson correlation with the requested feature vector. It returns up to five matches and selects recorded route points within each activity's time window.
-
-Heart-rate zones are relative to the maximum observed heart rate after three-standard-deviation outlier filtering. They are dataset-derived categories, not personalized physiological thresholds. Weather matching uses the activity timestamp rounded down to the hour. This is an exploratory historical recommender, not a live weather forecast or route planner.
-
-The original dashboard assumes a sufficiently populated dataset containing running, cycling, and walking activities. Some plots and the five-route selector require enough complete records. Sparse or differently structured exports may need additional adaptation.
-
-## Development
-
-```bash
-python -m unittest discover -s tests -v
-python -m compileall -q app.py training_insights scripts
-```
-
-GitHub Actions runs these checks on pushes and pull requests. The tests use synthetic records; they do not need private exports, API credentials, or network access.
-
-## Publication notes and credits
-
-- Keep personal training exports and `.env` files out of commits. GPS routes, timestamps, and health measurements may identify a person.
-- The original source contained a Mapbox token. It has been removed from the working tree, but existing Git history can still contain it. Replace/revoke the old token before publishing that history; the cleanup does not rewrite commits.
-- Demo animations and the presentation are preserved unchanged. Review their visible content and confirm permission to share the included materials and weather snapshot before public release.
-- Weather data was obtained using Open-Meteo; the original request is preserved in `scripts/download_weather.py`. The tea animation source is recorded in the app's animation loader. Python, pandas, NumPy, Plotly, Matplotlib, Seaborn, Streamlit, and the listed integrations power the project.
-- No open-source license has been selected. Public visibility alone does not grant permission to reuse the project; the authors should agree on a license before adding one.
+**Aleksandra Mulewicz · Emilia Olszewska · Nina Onyszczuk**  
+University data analysis project (PDU).
